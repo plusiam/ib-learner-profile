@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>나는 어떤 학습자일까?</title>
+  <!-- 구글 폰트: 본문(Nanum Gothic Coding 대신 Noto Sans KR) + 포인트(Gaegu) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <!-- html2canvas: 이미지 저장용 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    /* ── CSS 변수 ── */
+    :root {
+      --bg: #FFF9F0;
+      --card-bg: #FFFFFF;
+      --text: #333333;
+      --text-light: #666666;
+      --shadow: rgba(0,0,0,0.08);
+      --radius: 18px;
+      --max-w: 600px;
+      --font-body: 'Noto Sans KR', sans-serif;
+      --font-point: 'Gaegu', cursive;
+      /* 학습자상 색상 */
+      --c-INQ: #FF6B6B; --cl-INQ: #FFE5E5;
+      --c-KNO: #4ECDC4; --cl-KNO: #E0FAF8;
+      --c-THI: #FFE66D; --cl-THI: #FFFBE0;
+      --c-COM: #95E1A3; --cl-COM: #E8FAF0;
+      --c-PRI: #A29BFE; --cl-PRI: #EDEBFF;
+      --c-OPE: #FF9A3C; --cl-OPE: #FFF0E0;
+      --c-CAR: #F8B500; --cl-CAR: #FFF8E0;
+      --c-RIS: #FF6B8A; --cl-RIS: #FFE5EC;
+      --c-BAL: #00B894; --cl-BAL: #E0FFF5;
+      --c-REF: #6C5CE7; --cl-REF: #E8E4FF;
+    }
+
+    /* ── 리셋 & 기본 ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── 앱 컨테이너 ── */
+    #app {
+      width: 100%;
+      max-width: var(--max-w);
+      position: relative;
+    }
+
+    /* ── 화면 공통 ── */
+    .screen {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    .screen.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── 카드 공통 ── */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 20px var(--shadow);
+      padding: 28px 24px;
+      margin-bottom: 16px;
+    }
+
+    /* ── 인트로 화면 ── */
+    .intro-card {
+      text-align: center;
+      padding: 40px 24px;
+    }
+    .intro-card h1 {
+      font-family: var(--font-point);
+      font-size: 2rem;
+      margin-bottom: 8px;
+      color: var(--c-INQ);
+    }
+    .intro-card .subtitle {
+      font-size: 1rem;
+      color: var(--text-light);
+      margin-bottom: 24px;
+    }
+    .intro-card .emoji-row {
+      font-size: 1.6rem;
+      margin-bottom: 24px;
+      letter-spacing: 4px;
+    }
+    .intro-card input[type="text"] {
+      width: 100%;
+      max-width: 280px;
+      padding: 14px 16px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-family: var(--font-body);
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .intro-card input[type="text"]:focus {
+      border-color: var(--c-INQ);
+    }
+    .intro-card .info-text {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-top: 8px;
+      margin-bottom: 20px;
+    }
+
+    /* ── 버튼 ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-family: var(--font-body);
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      min-height: 48px;
+      min-width: 48px;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: var(--c-INQ);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(255,107,107,0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 18px rgba(255,107,107,0.4); }
+    .btn-secondary {
+      background: #f0f0f0;
+      color: var(--text);
+    }
+    .btn-secondary:hover { background: #e4e4e4; }
+
+    /* ── 프로그레스 바 ── */
+    .progress-wrap {
+      margin-bottom: 16px;
+    }
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 6px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #eee;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--c-INQ), var(--c-PRI));
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+
+    /* ── 설문 화면 ── */
+    .question-card {
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+    }
+    .q-type-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: #f0f0f0;
+      color: var(--text-light);
+      margin-bottom: 12px;
+      align-self: flex-start;
+    }
+    .q-text {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+    .q-scenario {
+      background: #FFF5E6;
+      border-left: 4px solid var(--c-OPE);
+      padding: 14px 16px;
+      border-radius: 0 12px 12px 0;
+      margin-bottom: 16px;
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    /* ── 리커트형 선택지 ── */
+    .likert-options {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .likert-btn {
+      flex: 1;
+      min-width: 110px;
+      padding: 14px 8px;
+      border: 2px solid #eee;
+      border-radius: 14px;
+      background: #fff;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      min-height: 48px;
+    }
+    .likert-btn .emoji { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+    .likert-btn:hover { border-color: #ccc; background: #fafafa; }
+    .likert-btn.selected {
+      border-color: var(--c-INQ);
+      background: var(--cl-INQ);
+      font-weight: 700;
+    }
+
+    /* ── 카드 선택형 ── */
+    .card-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .card-opt {
+      padding: 16px 12px;
+      border: 2px solid #eee;
+      border-radius: 14px;
+      background: #fff;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      min-height: 48px;
+    }
+    .card-opt .emoji { font-size: 1.6rem; display: block; margin-bottom: 6px; }
+    .card-opt:hover { border-color: #ccc; }
+    .card-opt.selected {
+      border-color: var(--c-PRI);
+      background: var(--cl-PRI);
+      font-weight: 700;
+    }
+
+    /* ── A vs B 형 ── */
+    .ab-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ab-sides {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .ab-side {
+      padding: 16px 12px;
+      border: 2px solid #eee;
+      border-radius: 14px;
+      text-align: center;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .ab-side .emoji { font-size: 1.6rem; display: block; margin-bottom: 6px; }
+    .ab-side.side-a { border-color: #FFD6D6; background: #FFF5F5; }
+    .ab-side.side-b { border-color: #D6E4FF; background: #F5F8FF; }
+    .ab-btns {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .ab-btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 12px 8px;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.85rem;
+      font-family: var(--font-body);
+      transition: all 0.2s;
+      min-height: 48px;
+    }
+    .ab-btn:hover { border-color: #ccc; }
+    .ab-btn.selected {
+      font-weight: 700;
+    }
+    .ab-btn.selected.a-sel {
+      border-color: var(--c-RIS);
+      background: var(--cl-RIS);
+    }
+    .ab-btn.selected.b-sel {
+      border-color: #5B7FFF;
+      background: #E8EEFF;
+    }
+
+    /* ── 상황 제시형 ── */
+    .scenario-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .scenario-opt {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border: 2px solid #eee;
+      border-radius: 14px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      transition: all 0.2s;
+      min-height: 48px;
+    }
+    .scenario-opt .opt-label {
+      font-weight: 700;
+      color: var(--c-PRI);
+      flex-shrink: 0;
+    }
+    .scenario-opt:hover { border-color: #ccc; }
+    .scenario-opt.selected {
+      border-color: var(--c-COM);
+      background: var(--cl-COM);
+      font-weight: 700;
+    }
+
+    /* ── 네비게이션 ── */
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      gap: 12px;
+    }
+    .nav-row .btn { flex: 1; max-width: 160px; }
+
+    /* ── 임시 결과 화면 ── */
+    .temp-result { text-align: center; }
+    .temp-result h2 {
+      font-family: var(--font-point);
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+    .temp-top-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .temp-top-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .temp-top-item .rank { font-size: 1.4rem; }
+    .temp-top-item .profile-emoji { font-size: 1.8rem; }
+
+    /* ── 확인 질문 화면 ── */
+    .confirm-screen { text-align: center; }
+    .confirm-screen h2 {
+      font-family: var(--font-point);
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+    .confirm-screen .sub {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin-bottom: 20px;
+    }
+    .confirm-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .confirm-opt {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border: 2px solid #eee;
+      border-radius: 14px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+      text-align: left;
+      min-height: 48px;
+    }
+    .confirm-opt .profile-emoji { font-size: 1.6rem; }
+    .confirm-opt:hover { border-color: #ccc; }
+    .confirm-opt.selected {
+      border-color: var(--c-INQ);
+      background: var(--cl-INQ);
+      font-weight: 700;
+    }
+    .confirm-other-btn {
+      padding: 14px;
+      border: 2px dashed #ccc;
+      border-radius: 14px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: var(--text-light);
+      width: 100%;
+      font-family: var(--font-body);
+      min-height: 48px;
+    }
+    .confirm-other-btn:hover { border-color: #aaa; color: var(--text); }
+
+    /* ── 전체 학습자상 선택 (다른 학습자상 고르기) ── */
+    .all-profiles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .all-profile-opt {
+      padding: 14px 10px;
+      border: 2px solid #eee;
+      border-radius: 14px;
+      background: #fff;
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      min-height: 48px;
+    }
+    .all-profile-opt .emoji { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+    .all-profile-opt:hover { border-color: #ccc; }
+    .all-profile-opt.selected {
+      border-color: var(--c-INQ);
+      background: var(--cl-INQ);
+      font-weight: 700;
+    }
+
+    /* ── 최종 결과 카드 ── */
+    #resultCard {
+      text-align: center;
+    }
+    .result-header {
+      font-family: var(--font-point);
+      font-size: 1.5rem;
+      margin-bottom: 24px;
+    }
+    .result-section-title {
+      font-family: var(--font-point);
+      font-size: 1.2rem;
+      color: var(--text-light);
+      margin: 24px 0 14px;
+      padding-bottom: 6px;
+      border-bottom: 2px dashed #eee;
+    }
+    .result-top-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: left;
+    }
+    .result-top-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+    }
+    .result-top-item .rank { font-size: 1.3rem; flex-shrink: 0; }
+    .result-top-item .profile-emoji { font-size: 1.6rem; flex-shrink: 0; }
+    .result-top-item .profile-name { font-size: 1.05rem; }
+    .result-top-item .profile-tag {
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--text-light);
+      display: block;
+    }
+
+    /* 레이더 차트 영역 */
+    .radar-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 12px 0;
+    }
+    #radarCanvas {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* 학습자상 이야기 */
+    .profile-story {
+      text-align: left;
+      padding: 18px;
+      border-radius: 14px;
+      margin-bottom: 12px;
+    }
+    .profile-story h3 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+    .profile-story .desc-long {
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 10px;
+      line-height: 1.7;
+    }
+    .profile-story .virtue-info {
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .profile-story .virtue-main {
+      font-weight: 700;
+    }
+
+    /* 그림책 캐릭터 힌트 */
+    .character-hint-box {
+      text-align: left;
+      background: #FFF5E6;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 12px;
+    }
+    .character-hint-box .hint-q {
+      font-family: var(--font-point);
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+    .character-hint-box .hint-item {
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      padding-left: 8px;
+      border-left: 3px solid var(--c-OPE);
+      line-height: 1.6;
+    }
+
+    /* 메시지 */
+    .closing-msg {
+      font-family: var(--font-point);
+      font-size: 1.1rem;
+      color: var(--text-light);
+      margin: 20px 0 8px;
+      line-height: 1.6;
+    }
+    .credit {
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-bottom: 20px;
+    }
+
+    /* 하단 버튼 */
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .result-actions .btn { min-width: 140px; }
+
+    /* ── 반응형 ── */
+    @media (max-width: 400px) {
+      .likert-options { flex-direction: column; }
+      .likert-btn { min-width: unset; }
+      .ab-btns { flex-direction: column; }
+      .ab-btn { min-width: unset; }
+      .card-options { grid-template-columns: 1fr; }
+      .all-profiles-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== 인트로 화면 ===== -->
+  <div id="screenIntro" class="screen active">
+    <div class="card intro-card">
+      <div class="emoji-row">🔍📚💡🗣️⚖️🌍💛🚀⚡🪞</div>
+      <h1>나는 어떤 학습자일까?</h1>
+      <p class="subtitle">IB 학습자상으로 알아보는 나의 모습</p>
+      <input type="text" id="nameInput" placeholder="이름을 적어 줘!" maxlength="10" autocomplete="off">
+      <p class="info-text">30개 질문에 답하면 나의 학습자상 TOP 3를 알 수 있어!<br>약 12~15분 정도 걸려요.</p>
+      <button class="btn btn-primary" onclick="handleStart()">시작하기 ✨</button>
+    </div>
+  </div>
+
+  <!-- ===== 설문 화면 ===== -->
+  <div id="screenSurvey" class="screen">
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="progressLabel">1 / 30</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="card question-card" id="questionCard">
+      <!-- 문항이 여기에 렌더링됨 -->
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-secondary" id="btnPrev" onclick="prevQ()">⬅️ 이전</button>
+      <button class="btn btn-primary" id="btnNext" onclick="nextQ()">다음 ➡️</button>
+    </div>
+  </div>
+
+  <!-- ===== 임시 결과 화면 ===== -->
+  <div id="screenTempResult" class="screen">
+    <div class="card temp-result" id="tempResultContent">
+      <!-- 동적 생성 -->
+    </div>
+  </div>
+
+  <!-- ===== 확인 질문 화면 ===== -->
+  <div id="screenConfirm" class="screen">
+    <div class="card confirm-screen" id="confirmContent">
+      <!-- 동적 생성 -->
+    </div>
+  </div>
+
+  <!-- ===== 최종 결과 화면 ===== -->
+  <div id="screenResult" class="screen">
+    <div class="card" id="resultCard">
+      <!-- 동적 생성 -->
+    </div>
+    <div class="result-actions" id="resultActions">
+      <button class="btn btn-primary" onclick="saveImage()">📷 이미지 저장</button>
+      <button class="btn btn-secondary" onclick="resetSurvey()">🔄 다시 하기</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  학습자상 프로필 데이터
+// ═══════════════════════════════════════════════
+const PROFILES = {
+  INQ: { code:'INQ', name:'탐구하는 사람', eng:'Inquirers', emoji:'🔍', color:'#FF6B6B', colorLight:'#FFE5E5',
+    desc:'궁금한 건 못 참아! 끝까지 파고드는 사람',
+    descLong:'자연스러운 호기심을 키워 탐구하고 연구하는 데 필요한 능력을 갖춘 사람이에요. 스스로 배움을 즐기고, 평생 동안 배우려는 마음을 지니고 있어요.',
+    virtue:'호기심', virtueRelated:['성실','끈기'],
+    virtueDesc:'모르는 것을 그냥 지나치지 않고 알고 싶어하는 마음이 바로 호기심이에요. 이 미덕이 있으면 스스로 공부가 재미있어져요.',
+    characterHint:'새로운 세계를 탐험하거나, 비밀을 풀어나가는 주인공' },
+  KNO: { code:'KNO', name:'지식이 풍부한 사람', eng:'Knowledgeable', emoji:'📚', color:'#4ECDC4', colorLight:'#E0FAF8',
+    desc:'세상 이곳저곳의 이야기를 넓게 아는 사람',
+    descLong:'지역과 세계의 중요한 문제들을 탐구하면서 깊은 지식과 넓은 이해를 갖춘 사람이에요. 다양한 분야에 관심을 갖고 배워요.',
+    virtue:'지혜', virtueRelated:['성실','겸손'],
+    virtueDesc:'많이 아는 것만이 아니라, 아는 것을 올바르게 사용하는 힘이 지혜예요. 겸손하게 배우는 자세가 지혜를 키워요.',
+    characterHint:'다양한 지식으로 친구들의 문제를 해결해주는 주인공' },
+  THI: { code:'THI', name:'사고하는 사람', eng:'Thinkers', emoji:'💡', color:'#FFE66D', colorLight:'#FFFBE0',
+    desc:'쉽게 넘기지 않고 깊이 생각하는 사람',
+    descLong:'비판적이고 창의적으로 생각하여 복잡한 문제를 분석하고 책임감 있게 행동하는 사람이에요. "왜?"라는 질문을 자주 해요.',
+    virtue:'신중함', virtueRelated:['정의','지혜'],
+    virtueDesc:'성급하게 판단하지 않고 여러 면을 살펴보는 것이 신중함이에요. 깊이 생각할수록 더 좋은 결정을 내릴 수 있어요.',
+    characterHint:'어려운 상황에서 지혜로운 해결책을 찾아내는 주인공' },
+  COM: { code:'COM', name:'소통하는 사람', eng:'Communicators', emoji:'🗣️', color:'#95E1A3', colorLight:'#E8FAF0',
+    desc:'내 생각을 잘 전하고 남의 말도 잘 듣는 사람',
+    descLong:'다양한 언어와 방법으로 자신 있게 창의적으로 자기 생각을 표현하는 사람이에요. 다른 사람의 관점도 잘 경청해요.',
+    virtue:'경청', virtueRelated:['존중','협동'],
+    virtueDesc:'잘 듣는 것은 잘 말하는 것보다 어려워요. 상대방의 이야기에 귀 기울이는 경청이 진정한 소통의 시작이에요.',
+    characterHint:'서로 다른 존재들 사이에서 다리 역할을 하는 주인공' },
+  PRI: { code:'PRI', name:'원칙을 지키는 사람', eng:'Principled', emoji:'⚖️', color:'#A29BFE', colorLight:'#EDEBFF',
+    desc:'옳고 그름을 알고 정직하게 행동하는 사람',
+    descLong:'정직하고 성실하며 공정하고 정의로운 감각을 가진 사람이에요. 자기 행동과 결과에 책임을 져요.',
+    virtue:'정직', virtueRelated:['책임','정의'],
+    virtueDesc:'거짓 없이 바르게 말하고 행동하는 것이 정직이에요. 정직한 사람은 주변의 믿음을 얻고, 공정한 세상을 만들어요.',
+    characterHint:'불공정한 상황에 맞서 옳은 일을 해내는 주인공' },
+  OPE: { code:'OPE', name:'열린 마음을 지닌 사람', eng:'Open-minded', emoji:'🌍', color:'#FF9A3C', colorLight:'#FFF0E0',
+    desc:'나와 다른 생각도 존중하며 받아들이는 사람',
+    descLong:'자신의 문화와 역사, 경험에 대해 비판적으로 생각하면서도 다른 사람의 전통과 가치를 존중하고 이해하려는 사람이에요.',
+    virtue:'존중', virtueRelated:['관용','겸손'],
+    virtueDesc:'나와 다르다고 틀린 게 아니에요. 다름을 인정하고 소중히 여기는 마음이 존중이에요. 세상을 더 넓게 보게 해줘요.',
+    characterHint:'서로 다른 세계의 사람들을 이해하고 연결하는 주인공' },
+  CAR: { code:'CAR', name:'배려하는 사람', eng:'Caring', emoji:'💛', color:'#F8B500', colorLight:'#FFF8E0',
+    desc:'다른 사람의 마음을 느끼고 돕는 사람',
+    descLong:'공감과 연민, 존중을 보여주는 사람이에요. 봉사 정신이 있고 다른 사람의 삶에 긍정적인 변화를 만들기 위해 행동해요.',
+    virtue:'공감', virtueRelated:['봉사','사랑'],
+    virtueDesc:'다른 사람의 기쁨과 슬픔을 함께 느끼는 마음이 공감이에요. 공감할 수 있는 사람은 세상을 더 따뜻하게 만들어요.',
+    characterHint:'아픈 친구나 소외된 이웃을 돌보는 따뜻한 주인공' },
+  RIS: { code:'RIS', name:'도전하는 사람', eng:'Risk-takers', emoji:'🚀', color:'#FF6B8A', colorLight:'#FFE5EC',
+    desc:'실패가 두렵지 않아! 새로운 길을 여는 사람',
+    descLong:'낯선 상황과 불확실성에 용기를 가지고 접근하는 사람이에요. 새로운 역할, 아이디어, 전략을 스스로 탐구하려는 독립심을 가지고 있어요.',
+    virtue:'용기', virtueRelated:['끈기','자신감'],
+    virtueDesc:'무섭거나 어려운 일 앞에서도 한 발짝 내딛는 힘이 용기예요. 실패해도 다시 일어나는 것, 그것이 진짜 용기예요.',
+    characterHint:'모험을 떠나 두려움을 극복하고 성장하는 주인공' },
+  BAL: { code:'BAL', name:'균형 잡힌 사람', eng:'Balanced', emoji:'⚡', color:'#00B894', colorLight:'#E0FFF5',
+    desc:'공부도 놀이도 건강도 골고루 챙기는 사람',
+    descLong:'지적·신체적·정서적 균형과 개인의 행복이 중요하다는 걸 아는 사람이에요. 다른 사람과의 상호 의존성도 이해해요.',
+    virtue:'절제', virtueRelated:['자기관리','조화'],
+    virtueDesc:'하고 싶은 일과 해야 할 일의 균형을 찾는 것이 절제예요. 절제할 줄 아는 사람은 삶을 더 건강하게 만들어요.',
+    characterHint:'한쪽으로 치우친 세상에 균형과 조화를 가져다주는 주인공' },
+  REF: { code:'REF', name:'성찰하는 사람', eng:'Reflective', emoji:'🪞', color:'#6C5CE7', colorLight:'#E8E4FF',
+    desc:'나를 돌아보며 더 나은 내가 되려는 사람',
+    descLong:'자신의 배움과 경험을 신중하게 되돌아보는 사람이에요. 자기 자신의 강점과 약점을 이해하여 배움과 성장에 도움을 줘요.',
+    virtue:'반성', virtueRelated:['겸손','성실'],
+    virtueDesc:'잘한 것과 잘못한 것을 돌아보는 것이 반성이에요. 반성은 후회가 아니라 성장을 위한 힘이에요.',
+    characterHint:'실수를 통해 배우고 한 뼘씩 성장해가는 주인공' }
+};
+
+// ═══════════════════════════════════════════════
+//  30문항 데이터
+//  type: 'likert' | 'card' | 'ab' | 'scenario'
+//  profile: 해당 학습자상 코드
+// ═══════════════════════════════════════════════
+const QUESTIONS = [
+  // ── 탐구하는 (INQ) ── 문항1: 리커트, 문항2: 상황제시, 문항3: 카드선택
+  {
+    id: 1, profile: 'INQ', type: 'likert',
+    text: '나는 궁금한 게 생기면 끝까지 알아내고 싶은 편이다.',
+    // 리커트: 1~4점 직접 부여
+  },
+  {
+    id: 2, profile: 'INQ', type: 'scenario',
+    scenario: '과학 시간에 실험을 했는데, 예상과 다른 결과가 나왔어!',
+    options: [
+      { text: '"왜 이런 결과가 나왔지?" 하고 원인을 찾아본다', target: 'INQ' },
+      { text: '선생님께 정답이 뭔지 여쭤본다', target: 'KNO' },
+      { text: '친구들과 각자 생각을 나눠 본다', target: 'COM' },
+      { text: '다음에는 더 잘하자고 마음먹는다', target: 'REF' }
+    ]
+  },
+  {
+    id: 3, profile: 'INQ', type: 'card',
+    text: '쉬는 시간에 가장 하고 싶은 건?',
+    options: [
+      { emoji: '🔍', text: '궁금했던 거 검색해보기', target: 'INQ' },
+      { emoji: '🎨', text: '그림 그리거나 만들기', target: 'RIS' },
+      { emoji: '🤝', text: '친구와 수다 떨기', target: 'COM' },
+      { emoji: '📖', text: '조용히 책 읽기', target: 'REF' }
+    ]
+  },
+
+  // ── 지식이 풍부한 (KNO) ── 문항1: 카드선택, 문항2: A vs B, 문항3: 리커트
+  {
+    id: 4, profile: 'KNO', type: 'card',
+    text: '도서관에서 책을 고른다면?',
+    options: [
+      { emoji: '🌏', text: '세계 여러 나라 이야기', target: 'KNO' },
+      { emoji: '🧪', text: '과학 실험 방법', target: 'INQ' },
+      { emoji: '💖', text: '감동적인 이야기', target: 'CAR' },
+      { emoji: '🏆', text: '도전과 모험 이야기', target: 'RIS' }
+    ]
+  },
+  {
+    id: 5, profile: 'KNO', type: 'ab',
+    sideA: { emoji: '📚', text: '여러 가지를 넓게 아는 게 좋아', target: 'KNO' },
+    sideB: { emoji: '🔬', text: '한 가지를 깊이 아는 게 좋아', target: 'INQ' }
+  },
+  {
+    id: 6, profile: 'KNO', type: 'likert',
+    text: '나는 뉴스나 다큐멘터리에서 새로운 사실을 알게 되면 기분이 좋다.'
+  },
+
+  // ── 사고하는 (THI) ── 문항1: 상황제시, 문항2: 리커트, 문항3: A vs B
+  {
+    id: 7, profile: 'THI', type: 'scenario',
+    scenario: '모둠에서 발표 주제를 정해야 해. 친구들 의견이 서로 달라!',
+    options: [
+      { text: '각 의견의 장단점을 비교해 본다', target: 'THI' },
+      { text: '다수결로 빨리 정한다', target: 'BAL' },
+      { text: '모두가 조금씩 양보할 방법을 찾는다', target: 'CAR' },
+      { text: '가장 공정한 방법이 뭔지 따져본다', target: 'PRI' }
+    ]
+  },
+  {
+    id: 8, profile: 'THI', type: 'likert',
+    text: '나는 어떤 일을 할 때 "왜 이렇게 해야 하지?"라고 생각하는 편이다.'
+  },
+  {
+    id: 9, profile: 'THI', type: 'ab',
+    sideA: { emoji: '🧩', text: '천천히 깊이 생각하는 게 좋아', target: 'THI' },
+    sideB: { emoji: '⚡', text: '빠르게 해보면서 배우는 게 좋아', target: 'RIS' }
+  },
+
+  // ── 소통하는 (COM) ── 문항1: A vs B, 문항2: 카드선택, 문항3: 상황제시
+  {
+    id: 10, profile: 'COM', type: 'ab',
+    sideA: { emoji: '🗣️', text: '내 생각을 말로 잘 설명하는 편이야', target: 'COM' },
+    sideB: { emoji: '✍️', text: '내 생각을 글로 잘 표현하는 편이야', target: 'REF' }
+  },
+  {
+    id: 11, profile: 'COM', type: 'card',
+    text: '모둠 활동에서 내가 가장 잘할 수 있는 역할은?',
+    options: [
+      { emoji: '🎤', text: '발표하기', target: 'COM' },
+      { emoji: '📝', text: '자료 정리하기', target: 'KNO' },
+      { emoji: '🎨', text: '꾸미기·디자인', target: 'OPE' },
+      { emoji: '🤔', text: '아이디어 내기', target: 'THI' }
+    ]
+  },
+  {
+    id: 12, profile: 'COM', type: 'scenario',
+    scenario: '전학 온 친구가 쉬는 시간에 혼자 앉아 있어.',
+    options: [
+      { text: '다가가서 "같이 놀래?" 하고 말을 건다', target: 'COM' },
+      { text: '우리 모둠에 데려와서 함께 활동한다', target: 'CAR' },
+      { text: '선생님께 말씀드린다', target: 'PRI' },
+      { text: '그 친구가 뭘 좋아하는지 먼저 살펴본다', target: 'INQ' }
+    ]
+  },
+
+  // ── 원칙을 지키는 (PRI) ── 문항1: 리커트, 문항2: 상황제시, 문항3: A vs B
+  {
+    id: 13, profile: 'PRI', type: 'likert',
+    text: '나는 규칙이 정해져 있으면 꼭 지키려고 노력한다.'
+  },
+  {
+    id: 14, profile: 'PRI', type: 'scenario',
+    scenario: '시험 시간에 옆 친구가 답을 보여 달라고 해.',
+    options: [
+      { text: '안 된다고 분명하게 말한다', target: 'PRI' },
+      { text: '모른 척하고 시험에 집중한다', target: 'BAL' },
+      { text: '시험 끝나고 같이 공부하자고 한다', target: 'CAR' },
+      { text: '선생님 몰래 살짝 알려준다', target: 'COM' }
+    ]
+  },
+  {
+    id: 15, profile: 'PRI', type: 'ab',
+    sideA: { emoji: '⚖️', text: '규칙을 잘 지키는 게 중요해', target: 'PRI' },
+    sideB: { emoji: '🌈', text: '상황에 따라 유연하게 하는 게 중요해', target: 'OPE' }
+  },
+
+  // ── 열린 마음 (OPE) ── 문항1: 카드선택, 문항2: A vs B, 문항3: 상황제시
+  {
+    id: 16, profile: 'OPE', type: 'card',
+    text: '점심시간에 급식 메뉴가 처음 보는 외국 음식이야! 나는?',
+    options: [
+      { emoji: '😋', text: '오, 신기하다! 일단 먹어볼래', target: 'OPE' },
+      { emoji: '🔍', text: '어떤 나라 음식인지 찾아본다', target: 'KNO' },
+      { emoji: '😰', text: '좀 무섭지만 용기 내서 한 입 먹는다', target: 'RIS' },
+      { emoji: '🍚', text: '익숙한 반찬만 먹는다', target: 'BAL' }
+    ]
+  },
+  {
+    id: 17, profile: 'OPE', type: 'ab',
+    sideA: { emoji: '🌍', text: '다른 나라 문화를 배우는 게 재밌어', target: 'OPE' },
+    sideB: { emoji: '🏠', text: '우리나라 문화를 깊이 아는 게 먼저야', target: 'KNO' }
+  },
+  {
+    id: 18, profile: 'OPE', type: 'scenario',
+    scenario: '미술 시간에 친구가 나와 완전히 다른 방식으로 작품을 만들었어.',
+    options: [
+      { text: '"와, 이런 방법도 있구나!" 하고 감탄한다', target: 'OPE' },
+      { text: '어떻게 만들었는지 방법을 물어본다', target: 'INQ' },
+      { text: '내 작품과 비교해서 더 좋은 점을 찾는다', target: 'THI' },
+      { text: '나도 다음에 새로운 방법을 시도해본다', target: 'RIS' }
+    ]
+  },
+
+  // ── 배려하는 (CAR) ── 문항1: 상황제시, 문항2: 리커트, 문항3: 카드선택
+  {
+    id: 19, profile: 'CAR', type: 'scenario',
+    scenario: '친구가 발표 준비를 하다가 울먹이고 있어.',
+    options: [
+      { text: '"괜찮아? 내가 도와줄까?" 하고 다가간다', target: 'CAR' },
+      { text: '선생님께 조용히 알려드린다', target: 'PRI' },
+      { text: '"같이 연습하자!" 하고 격려한다', target: 'COM' },
+      { text: '조용히 지켜보면서 끝나면 칭찬해준다', target: 'REF' }
+    ]
+  },
+  {
+    id: 20, profile: 'CAR', type: 'likert',
+    text: '나는 친구가 힘들어하면 내 일처럼 마음이 아프다.'
+  },
+  {
+    id: 21, profile: 'CAR', type: 'card',
+    text: '내가 가장 기분 좋을 때는?',
+    options: [
+      { emoji: '💛', text: '내가 도와줘서 친구가 웃을 때', target: 'CAR' },
+      { emoji: '🏅', text: '열심히 노력해서 좋은 결과를 얻을 때', target: 'RIS' },
+      { emoji: '💡', text: '어려운 문제를 풀었을 때', target: 'THI' },
+      { emoji: '👏', text: '발표를 잘해서 칭찬받을 때', target: 'COM' }
+    ]
+  },
+
+  // ── 도전하는 (RIS) ── 문항1: A vs B, 문항2: 카드선택, 문항3: 리커트
+  {
+    id: 22, profile: 'RIS', type: 'ab',
+    sideA: { emoji: '🚀', text: '새로운 걸 시도하는 게 신나!', target: 'RIS' },
+    sideB: { emoji: '🛡️', text: '잘 아는 방법으로 하는 게 안심돼', target: 'BAL' }
+  },
+  {
+    id: 23, profile: 'RIS', type: 'card',
+    text: '체험학습 장소를 고를 수 있다면?',
+    options: [
+      { emoji: '🧗', text: '한 번도 안 해본 암벽등반 체험', target: 'RIS' },
+      { emoji: '🏛️', text: '역사 박물관 관람', target: 'KNO' },
+      { emoji: '🎭', text: '연극 만들기 체험', target: 'COM' },
+      { emoji: '🌿', text: '자연 속 힐링 산책', target: 'BAL' }
+    ]
+  },
+  {
+    id: 24, profile: 'RIS', type: 'likert',
+    text: '나는 실패해도 괜찮다고 생각하고 새로운 것을 도전하는 편이다.'
+  },
+
+  // ── 균형 잡힌 (BAL) ── 문항1: 리커트, 문항2: 상황제시, 문항3: A vs B
+  {
+    id: 25, profile: 'BAL', type: 'likert',
+    text: '나는 공부, 운동, 놀이를 골고루 하려고 노력한다.'
+  },
+  {
+    id: 26, profile: 'BAL', type: 'scenario',
+    scenario: '내일이 시험인데 오늘 좋아하는 TV 프로그램이 해!',
+    options: [
+      { text: '시험 공부를 먼저 하고, 남은 시간에 잠깐 본다', target: 'BAL' },
+      { text: '시험 공부에만 집중한다', target: 'PRI' },
+      { text: 'TV를 보면서 기분 전환을 한 뒤 공부한다', target: 'RIS' },
+      { text: '어떻게 할지 잠시 생각해본다', target: 'THI' }
+    ]
+  },
+  {
+    id: 27, profile: 'BAL', type: 'ab',
+    sideA: { emoji: '⚖️', text: '여러 가지를 골고루 하는 게 좋아', target: 'BAL' },
+    sideB: { emoji: '🎯', text: '한 가지에 집중하는 게 좋아', target: 'INQ' }
+  },
+
+  // ── 성찰하는 (REF) ── 문항1: 상황제시, 문항2: A vs B, 문항3: 카드선택
+  {
+    id: 28, profile: 'REF', type: 'scenario',
+    scenario: '친구와 말다툼을 해서 기분이 안 좋아.',
+    options: [
+      { text: '내가 뭘 잘못했는지 혼자 생각해본다', target: 'REF' },
+      { text: '다른 친구에게 이야기해서 의견을 듣는다', target: 'COM' },
+      { text: '먼저 가서 사과한다', target: 'CAR' },
+      { text: '시간이 지나면 괜찮아질 거라고 생각한다', target: 'BAL' }
+    ]
+  },
+  {
+    id: 29, profile: 'REF', type: 'ab',
+    sideA: { emoji: '🪞', text: '하루를 돌아보는 시간이 중요해', target: 'REF' },
+    sideB: { emoji: '🌟', text: '내일 할 일을 계획하는 게 중요해', target: 'PRI' }
+  },
+  {
+    id: 30, profile: 'REF', type: 'card',
+    text: '일기를 쓸 때 나는 주로?',
+    options: [
+      { emoji: '🪞', text: '오늘 내가 느낀 감정을 정리한다', target: 'REF' },
+      { emoji: '📚', text: '오늘 배운 것을 적는다', target: 'KNO' },
+      { emoji: '🎯', text: '내일 목표를 세운다', target: 'PRI' },
+      { emoji: '💛', text: '고마운 사람에 대해 쓴다', target: 'CAR' }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════
+//  상태 변수
+// ═══════════════════════════════════════════════
+let studentName = '';        // 학생 이름
+let currentQ = 0;            // 현재 문항 인덱스 (셔플된 순서 기준)
+let shuffledQuestions = [];   // 셔플된 문항 배열
+let answers = {};             // { 문항id: 응답값 } 형태로 저장
+let scores = {};              // 학습자상별 점수
+let tempTop3 = [];            // 임시 TOP 3
+let finalTop3 = [];           // 최종 TOP 3
+let confirmSelection = null;  // 확인 질문에서 선택한 학습자상 코드
+let showingAllProfiles = false; // 전체 학습자상 선택 모드 여부
+
+// ═══════════════════════════════════════════════
+//  화면 전환
+// ═══════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  target.classList.add('active');
+  // 스크롤 맨 위로
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════
+//  인트로 → 설문 시작
+// ═══════════════════════════════════════════════
+function handleStart() {
+  const nameVal = document.getElementById('nameInput').value.trim();
+  if (!nameVal) {
+    document.getElementById('nameInput').focus();
+    document.getElementById('nameInput').style.borderColor = '#FF6B6B';
+    return;
+  }
+  studentName = nameVal;
+  startSurvey();
+}
+
+// 엔터키로 시작
+document.getElementById('nameInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') handleStart();
+});
+
+// ═══════════════════════════════════════════════
+//  설문 시작 (셔플 + 초기화)
+// ═══════════════════════════════════════════════
+function startSurvey() {
+  // 응답 초기화
+  answers = {};
+  scores = {};
+  currentQ = 0;
+  confirmSelection = null;
+  showingAllProfiles = false;
+
+  // 문항 셔플 (같은 학습자상 연속 방지)
+  shuffledQuestions = shuffleQuestions([...QUESTIONS]);
+
+  showScreen('screenSurvey');
+  renderQuestion(0);
+}
+
+// 문항 셔플: 같은 학습자상이 연속되지 않도록
+function shuffleQuestions(arr) {
+  // Fisher-Yates 셔플
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  // 같은 학습자상 연속 방지 — 최대 50회 시도
+  for (let attempt = 0; attempt < 50; attempt++) {
+    let hasConsecutive = false;
+    for (let i = 1; i < arr.length; i++) {
+      if (arr[i].profile === arr[i-1].profile) {
+        // 뒤쪽에서 다른 profile을 가진 문항과 교체
+        for (let k = i + 1; k < arr.length; k++) {
+          if (arr[k].profile !== arr[i].profile && arr[k].profile !== (arr[i-1] ? arr[i-1].profile : '')) {
+            [arr[i], arr[k]] = [arr[k], arr[i]];
+            break;
+          }
+        }
+        hasConsecutive = true;
+      }
+    }
+    if (!hasConsecutive) break;
+  }
+  return arr;
+}
+
+// ═══════════════════════════════════════════════
+//  문항 렌더링
+// ═══════════════════════════════════════════════
+function renderQuestion(idx) {
+  currentQ = idx;
+  const q = shuffledQuestions[idx];
+  const card = document.getElementById('questionCard');
+
+  // 프로그레스 바 업데이트
+  const pct = Math.round(((idx) / QUESTIONS.length) * 100);
+  document.getElementById('progressLabel').textContent = `${idx + 1} / ${QUESTIONS.length}`;
+  document.getElementById('progressPct').textContent = `${pct}%`;
+  document.getElementById('progressFill').style.width = `${pct}%`;
+
+  // 이전 버튼 활성화/비활성화
+  document.getElementById('btnPrev').style.visibility = idx === 0 ? 'hidden' : 'visible';
+
+  // 다음 버튼 텍스트
+  const btnNext = document.getElementById('btnNext');
+  btnNext.textContent = idx === QUESTIONS.length - 1 ? '결과 보기 🎉' : '다음 ➡️';
+
+  // 유형별 렌더링
+  let html = '';
+  const typeLabels = { likert: '💭 어떤 편인지 골라봐', card: '🃏 카드 하나를 골라봐', ab: '🔀 어느 쪽에 더 가까워?', scenario: '🎬 이럴 때 나는?' };
+  html += `<span class="q-type-badge">${typeLabels[q.type]}</span>`;
+
+  switch(q.type) {
+    case 'likert': html += renderLikert(q); break;
+    case 'card':   html += renderCard(q); break;
+    case 'ab':     html += renderAB(q); break;
+    case 'scenario': html += renderScenario(q); break;
+  }
+
+  card.innerHTML = html;
+
+  // 이전 응답 복원
+  restoreAnswer(q);
+}
+
+// ── 리커트형 렌더러 ──
+function renderLikert(q) {
+  const emojis = ['😑', '🤔', '😊', '🤩'];
+  const labels = ['전혀 아니다', '별로 아니다', '조금 그렇다', '매우 그렇다'];
+  let html = `<p class="q-text">${q.text}</p>`;
+  html += '<div class="likert-options">';
+  for (let i = 0; i < 4; i++) {
+    html += `<button class="likert-btn" data-value="${i+1}" onclick="selectLikert(this, ${q.id}, ${i+1})">
+      <span class="emoji">${emojis[i]}</span>${labels[i]}
+    </button>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+// ── 카드 선택형 렌더러 ──
+function renderCard(q) {
+  let html = `<p class="q-text">${q.text}</p>`;
+  html += '<div class="card-options">';
+  q.options.forEach((opt, i) => {
+    html += `<button class="card-opt" data-index="${i}" onclick="selectCard(this, ${q.id}, '${opt.target}')">
+      <span class="emoji">${opt.emoji}</span>${opt.text}
+    </button>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+// ── A vs B형 렌더러 ──
+function renderAB(q) {
+  let html = `<p class="q-text">어느 쪽이 나와 더 가까울까?</p>`;
+  html += '<div class="ab-container">';
+  html += '<div class="ab-sides">';
+  html += `<div class="ab-side side-a"><span class="emoji">${q.sideA.emoji}</span>${q.sideA.text}</div>`;
+  html += `<div class="ab-side side-b"><span class="emoji">${q.sideB.emoji}</span>${q.sideB.text}</div>`;
+  html += '</div>';
+  html += '<div class="ab-btns">';
+  html += `<button class="ab-btn" onclick="selectAB(this, ${q.id}, 'a4')">많이 왼쪽</button>`;
+  html += `<button class="ab-btn" onclick="selectAB(this, ${q.id}, 'a3')">조금 왼쪽</button>`;
+  html += `<button class="ab-btn" onclick="selectAB(this, ${q.id}, 'b3')">조금 오른쪽</button>`;
+  html += `<button class="ab-btn" onclick="selectAB(this, ${q.id}, 'b4')">많이 오른쪽</button>`;
+  html += '</div></div>';
+  return html;
+}
+
+// ── 상황 제시형 렌더러 ──
+function renderScenario(q) {
+  let html = `<div class="q-scenario">${q.scenario}</div>`;
+  html += '<div class="scenario-options">';
+  const labels = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    html += `<button class="scenario-opt" data-index="${i}" onclick="selectScenario(this, ${q.id}, '${opt.target}')">
+      <span class="opt-label">${labels[i]}</span><span>${opt.text}</span>
+    </button>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+// ═══════════════════════════════════════════════
+//  선택 처리 함수들
+// ═══════════════════════════════════════════════
+
+// 리커트 선택
+function selectLikert(btn, qId, value) {
+  btn.parentElement.querySelectorAll('.likert-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const q = QUESTIONS.find(x => x.id === qId);
+  answers[qId] = { type: 'likert', profile: q.profile, value: value };
+}
+
+// 카드 선택
+function selectCard(btn, qId, target) {
+  btn.parentElement.querySelectorAll('.card-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  answers[qId] = { type: 'card', target: target, value: 4 };
+}
+
+// A vs B 선택
+function selectAB(btn, qId, choice) {
+  btn.parentElement.querySelectorAll('.ab-btn').forEach(b => {
+    b.classList.remove('selected', 'a-sel', 'b-sel');
+  });
+  btn.classList.add('selected');
+  btn.classList.add(choice.startsWith('a') ? 'a-sel' : 'b-sel');
+
+  const q = QUESTIONS.find(x => x.id === qId);
+  const side = choice[0]; // 'a' 또는 'b'
+  const pts = parseInt(choice[1]); // 3 또는 4
+  const target = side === 'a' ? q.sideA.target : q.sideB.target;
+  const otherTarget = side === 'a' ? q.sideB.target : q.sideA.target;
+  const otherPts = pts === 4 ? 1 : 2; // 많이=4→반대1, 조금=3→반대2
+  answers[qId] = { type: 'ab', target: target, value: pts, otherTarget: otherTarget, otherValue: otherPts };
+}
+
+// 상황 제시 선택
+function selectScenario(btn, qId, target) {
+  btn.parentElement.querySelectorAll('.scenario-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  answers[qId] = { type: 'scenario', target: target, value: 4 };
+}
+
+// ── 이전 응답 복원 ──
+function restoreAnswer(q) {
+  const ans = answers[q.id];
+  if (!ans) return;
+
+  switch(q.type) {
+    case 'likert': {
+      const btns = document.querySelectorAll('.likert-btn');
+      btns.forEach(b => {
+        if (parseInt(b.dataset.value) === ans.value) b.classList.add('selected');
+      });
+      break;
+    }
+    case 'card': {
+      const btns = document.querySelectorAll('.card-opt');
+      const q2 = QUESTIONS.find(x => x.id === q.id);
+      btns.forEach((b, i) => {
+        if (q2.options[i].target === ans.target) b.classList.add('selected');
+      });
+      break;
+    }
+    case 'ab': {
+      const btns = document.querySelectorAll('.ab-btn');
+      const map = { a4: 0, a3: 1, b3: 2, b4: 3 };
+      const side = ans.target === QUESTIONS.find(x => x.id === q.id).sideA.target ? 'a' : 'b';
+      const key = side + ans.value;
+      const idx = map[key];
+      if (idx !== undefined && btns[idx]) {
+        btns[idx].classList.add('selected', side === 'a' ? 'a-sel' : 'b-sel');
+      }
+      break;
+    }
+    case 'scenario': {
+      const btns = document.querySelectorAll('.scenario-opt');
+      const q2 = QUESTIONS.find(x => x.id === q.id);
+      btns.forEach((b, i) => {
+        if (q2.options[i].target === ans.target) b.classList.add('selected');
+      });
+      break;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  네비게이션
+// ═══════════════════════════════════════════════
+function nextQ() {
+  const q = shuffledQuestions[currentQ];
+  // 응답 확인
+  if (!answers[q.id]) {
+    // 미응답 시 살짝 흔들기 효과
+    const card = document.getElementById('questionCard');
+    card.style.animation = 'none';
+    card.offsetHeight; // reflow
+    card.style.animation = 'shake 0.4s ease';
+    return;
+  }
+
+  if (currentQ < QUESTIONS.length - 1) {
+    renderQuestion(currentQ + 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    // 설문 완료 → 점수 계산 → 임시 결과
+    calcScores();
+    tempTop3 = getTop3();
+    showTempResult();
+  }
+}
+
+function prevQ() {
+  if (currentQ > 0) {
+    renderQuestion(currentQ - 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// 흔들기 애니메이션
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+`;
+document.head.appendChild(shakeStyle);
+
+// ═══════════════════════════════════════════════
+//  점수 계산
+// ═══════════════════════════════════════════════
+function calcScores() {
+  // 초기화
+  scores = {};
+  Object.keys(PROFILES).forEach(k => { scores[k] = 0; });
+
+  // 상황제시형 점수 별도 추적 (동점 시 우선순위용)
+  window.scenarioScores = {};
+  Object.keys(PROFILES).forEach(k => { window.scenarioScores[k] = 0; });
+
+  Object.values(answers).forEach(ans => {
+    switch(ans.type) {
+      case 'likert':
+        scores[ans.profile] += ans.value;
+        break;
+      case 'card':
+        scores[ans.target] += ans.value;
+        break;
+      case 'ab':
+        scores[ans.target] += ans.value;
+        scores[ans.otherTarget] += ans.otherValue;
+        break;
+      case 'scenario':
+        scores[ans.target] += ans.value;
+        window.scenarioScores[ans.target] += ans.value;
+        break;
+    }
+  });
+}
+
+// TOP 3 추출 (동점 시 상황제시형 점수 우선)
+function getTop3() {
+  const sorted = Object.entries(scores).sort((a, b) => {
+    if (b[1] !== a[1]) return b[1] - a[1];
+    // 동점: 상황제시형 점수 우선
+    return (window.scenarioScores[b[0]] || 0) - (window.scenarioScores[a[0]] || 0);
+  });
+  return sorted.slice(0, 3).map(([code, score]) => ({ code, score }));
+}
+
+// ═══════════════════════════════════════════════
+//  임시 결과 화면
+// ═══════════════════════════════════════════════
+function showTempResult() {
+  const container = document.getElementById('tempResultContent');
+  const ranks = ['🥇', '🥈', '🥉'];
+  let html = `<h2>✨ ${studentName}의 TOP 3 학습자상이야!</h2>`;
+  html += '<div class="temp-top-list">';
+  tempTop3.forEach((item, i) => {
+    const p = PROFILES[item.code];
+    html += `<div class="temp-top-item" style="background:${p.colorLight};">
+      <span class="rank">${ranks[i]}</span>
+      <span class="profile-emoji">${p.emoji}</span>
+      <span>${p.name}<br><small style="color:#555;font-weight:400">${p.desc}</small></span>
+    </div>`;
+  });
+  html += '</div>';
+  html += `<button class="btn btn-primary" onclick="showConfirm()">다음으로 ➡️</button>`;
+  container.innerHTML = html;
+  showScreen('screenTempResult');
+}
+
+// ═══════════════════════════════════════════════
+//  확인 질문 화면
+// ═══════════════════════════════════════════════
+function showConfirm() {
+  confirmSelection = null;
+  showingAllProfiles = false;
+  const container = document.getElementById('confirmContent');
+  renderConfirmContent(container);
+  showScreen('screenConfirm');
+}
+
+function renderConfirmContent(container) {
+  let html = `<h2>🌟 이 중에서 가장 되고 싶은 학습자상은?</h2>`;
+  html += `<p class="sub">네가 선택한 학습자상이 TOP 1이 돼!</p>`;
+
+  if (!showingAllProfiles) {
+    // TOP 3 중 선택
+    html += '<div class="confirm-options" id="confirmOptions">';
+    tempTop3.forEach(item => {
+      const p = PROFILES[item.code];
+      html += `<button class="confirm-opt" data-code="${item.code}" onclick="selectConfirm('${item.code}')">
+        <span class="profile-emoji">${p.emoji}</span>
+        <span>${p.name}</span>
+      </button>`;
+    });
+    html += '</div>';
+    html += `<button class="confirm-other-btn" onclick="showAllProfilesSelect()">🔮 다른 학습자상 고르기</button>`;
+  } else {
+    // 전체 10개 중 선택
+    html += `<p style="font-size:0.9rem;color:var(--text-light);margin-bottom:12px;">10개 학습자상 중에서 골라봐!</p>`;
+    html += '<div class="all-profiles-grid" id="allProfilesGrid">';
+    Object.values(PROFILES).forEach(p => {
+      html += `<button class="all-profile-opt" data-code="${p.code}" onclick="selectConfirm('${p.code}')">
+        <span class="emoji">${p.emoji}</span>${p.name}
+      </button>`;
+    });
+    html += '</div>';
+    html += `<button class="confirm-other-btn" onclick="showingAllProfiles=false;renderConfirmContent(document.getElementById('confirmContent'))">⬅️ TOP 3에서 고르기</button>`;
+  }
+
+  html += `<br><button class="btn btn-primary" id="confirmBtn" style="margin-top:16px;opacity:0.5;pointer-events:none;" onclick="finalizeResult()">결과 보기 🎉</button>`;
+  container.innerHTML = html;
+}
+
+function showAllProfilesSelect() {
+  showingAllProfiles = true;
+  renderConfirmContent(document.getElementById('confirmContent'));
+}
+
+function selectConfirm(code) {
+  confirmSelection = code;
+  // 선택 UI 업데이트
+  if (!showingAllProfiles) {
+    document.querySelectorAll('.confirm-opt').forEach(b => {
+      b.classList.toggle('selected', b.dataset.code === code);
+    });
+  } else {
+    document.querySelectorAll('.all-profile-opt').forEach(b => {
+      b.classList.toggle('selected', b.dataset.code === code);
+    });
+  }
+  // 확인 버튼 활성화
+  const btn = document.getElementById('confirmBtn');
+  btn.style.opacity = '1';
+  btn.style.pointerEvents = 'auto';
+}
+
+// ═══════════════════════════════════════════════
+//  최종 결과 산출
+// ═══════════════════════════════════════════════
+function finalizeResult() {
+  if (!confirmSelection) return;
+
+  // 최종 TOP 3 구성
+  const chosen = confirmSelection;
+  const top3Codes = tempTop3.map(t => t.code);
+
+  if (top3Codes.includes(chosen)) {
+    // TOP 3 중 선택 → 해당을 1위로
+    finalTop3 = [
+      { code: chosen, score: scores[chosen] },
+      ...tempTop3.filter(t => t.code !== chosen)
+    ];
+  } else {
+    // 다른 학습자상 선택 → 해당이 1위, 나머지 TOP 2·3 유지
+    finalTop3 = [
+      { code: chosen, score: scores[chosen] },
+      tempTop3[0],
+      tempTop3[1]
+    ];
+  }
+
+  showResult();
+}
+
+// ═══════════════════════════════════════════════
+//  최종 결과 화면
+// ═══════════════════════════════════════════════
+function showResult() {
+  const container = document.getElementById('resultCard');
+  const ranks = ['🥇', '🥈', '🥉'];
+  const rankLabels = ['내가 선택한 나의 모습', '', ''];
+
+  let html = `<div class="result-header">✨ ${studentName}의 학습자상 프로필 ✨</div>`;
+
+  // TOP 3 리스트
+  html += '<div class="result-section-title">── 나의 TOP 3 학습자상 ──</div>';
+  html += '<div class="result-top-list">';
+  finalTop3.forEach((item, i) => {
+    const p = PROFILES[item.code];
+    html += `<div class="result-top-item" style="background:${p.colorLight};">
+      <span class="rank">${ranks[i]}</span>
+      <span class="profile-emoji">${p.emoji}</span>
+      <div>
+        <span class="profile-name">${p.name}</span>
+        ${i === 0 ? '<span class="profile-tag">내가 선택한 나의 모습</span>' : ''}
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+
+  // 레이더 차트
+  html += '<div class="result-section-title">── 나의 학습자상 지도 ──</div>';
+  html += '<div class="radar-wrap"><canvas id="radarCanvas" width="360" height="360"></canvas></div>';
+
+  // 학습자상 이야기
+  html += '<div class="result-section-title">── 나의 학습자상 이야기 ──</div>';
+  finalTop3.forEach(item => {
+    const p = PROFILES[item.code];
+    html += `<div class="profile-story" style="background:${p.colorLight};">
+      <h3>${p.emoji} ${p.name}이란?</h3>
+      <p class="desc-long">${p.descLong}</p>
+      <div class="virtue-info">
+        <p class="virtue-main">✨ 핵심 미덕: ${p.virtue}</p>
+        <p>🌟 함께 빛나는 미덕: ${p.virtueRelated.join(', ')}</p>
+        <p>${p.virtueDesc}</p>
+      </div>
+    </div>`;
+  });
+
+  // 그림책 캐릭터 힌트
+  const virtues = finalTop3.map(t => PROFILES[t.code].virtue);
+  html += '<div class="result-section-title">── 📖 그림책 캐릭터 힌트 ──</div>';
+  html += '<div class="character-hint-box">';
+  html += `<p class="hint-q">"${virtues.join(' + ')}의 미덕을 가진 주인공이라면 어떤 이야기를 만들 수 있을까?"</p>`;
+  finalTop3.forEach(item => {
+    const p = PROFILES[item.code];
+    html += `<p class="hint-item">${p.emoji} ${p.characterHint}</p>`;
+  });
+  html += '</div>';
+
+  // 마무리 메시지
+  html += `<p class="closing-msg">💬 정답은 없어! 모든 학습자상이 소중해.<br>이건 참고용이야, 네 마음이 제일 중요해!</p>`;
+  html += `<p class="credit">5학년 도덕 2단원 · 반성과 성찰</p>`;
+
+  container.innerHTML = html;
+  showScreen('screenResult');
+
+  // 레이더 차트 그리기 (DOM 업데이트 후)
+  requestAnimationFrame(() => {
+    drawRadar();
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  레이더 차트 (Canvas)
+// ═══════════════════════════════════════════════
+function drawRadar() {
+  const canvas = document.getElementById('radarCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const size = 440;
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  ctx.scale(dpr, dpr);
+
+  const cx = size / 2;
+  const cy = size / 2;
+  const maxR = 140; // 최대 반지름
+  const levels = 3; // 동심원 수
+  const codes = Object.keys(PROFILES);
+  const n = codes.length;
+  const angleStep = (2 * Math.PI) / n;
+  const startAngle = -Math.PI / 2; // 12시 방향 시작
+
+  const top3Codes = finalTop3.map(t => t.code);
+
+  // 배경 동심원
+  ctx.strokeStyle = '#E0E0E0';
+  ctx.lineWidth = 1;
+  for (let lv = 1; lv <= levels; lv++) {
+    const r = (maxR / levels) * lv;
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const angle = startAngle + angleStep * i;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  // 축선
+  ctx.strokeStyle = '#D0D0D0';
+  for (let i = 0; i < n; i++) {
+    const angle = startAngle + angleStep * i;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + maxR * Math.cos(angle), cy + maxR * Math.sin(angle));
+    ctx.stroke();
+  }
+
+  // 데이터 영역
+  const maxScore = 12;
+  ctx.beginPath();
+  for (let i = 0; i <= n; i++) {
+    const idx = i % n;
+    const angle = startAngle + angleStep * idx;
+    const val = scores[codes[idx]] || 0;
+    const r = (val / maxScore) * maxR;
+    const x = cx + r * Math.cos(angle);
+    const y = cy + r * Math.sin(angle);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(162, 155, 254, 0.25)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(162, 155, 254, 0.8)';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // 데이터 포인트
+  for (let i = 0; i < n; i++) {
+    const angle = startAngle + angleStep * i;
+    const val = scores[codes[i]] || 0;
+    const r = (val / maxScore) * maxR;
+    const x = cx + r * Math.cos(angle);
+    const y = cy + r * Math.sin(angle);
+
+    const isTop3 = top3Codes.includes(codes[i]);
+    ctx.beginPath();
+    ctx.arc(x, y, isTop3 ? 6 : 4, 0, 2 * Math.PI);
+    ctx.fillStyle = isTop3 ? PROFILES[codes[i]].color : '#A29BFE';
+    ctx.fill();
+    if (isTop3) {
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  }
+
+  // 라벨
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i < n; i++) {
+    const angle = startAngle + angleStep * i;
+    const labelR = maxR + 42;
+    const x = cx + labelR * Math.cos(angle);
+    const y = cy + labelR * Math.sin(angle);
+    const p = PROFILES[codes[i]];
+    const isTop3 = top3Codes.includes(codes[i]);
+
+    ctx.font = isTop3 ? 'bold 12px "Noto Sans KR", sans-serif' : '11px "Noto Sans KR", sans-serif';
+    ctx.fillStyle = isTop3 ? p.color : '#888';
+
+    // 이모지 + 짧은 이름
+    const shortName = p.name.replace(' 사람', '').replace('을 지닌 ', '');
+    ctx.fillText(p.emoji, x, y - 8);
+    ctx.fillText(shortName, x, y + 8);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  이미지 저장
+// ═══════════════════════════════════════════════
+function saveImage() {
+  const target = document.getElementById('resultCard');
+  html2canvas(target, {
+    backgroundColor: '#FFF9F0',
+    scale: 2,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `${studentName}_학습자상프로필.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }).catch(err => {
+    alert('이미지 저장에 실패했어요. 스크린샷으로 저장해 주세요!');
+    console.error(err);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  다시 하기
+// ═══════════════════════════════════════════════
+function resetSurvey() {
+  studentName = '';
+  currentQ = 0;
+  answers = {};
+  scores = {};
+  tempTop3 = [];
+  finalTop3 = [];
+  confirmSelection = null;
+  showingAllProfiles = false;
+  document.getElementById('nameInput').value = '';
+  showScreen('screenIntro');
+}
+</script>
+</body>
+</html>
