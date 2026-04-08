@@ -572,8 +572,26 @@
     .credit {
       font-size: 0.8rem;
       color: #aaa;
-      margin-bottom: 20px;
+      margin-bottom: 8px;
     }
+    .footer-maker {
+      font-size: 0.75rem;
+      color: #bbb;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .footer-maker a {
+      color: #FF0000;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-weight: 600;
+    }
+    .footer-maker a:hover { text-decoration: underline; }
 
     /* 하단 버튼 */
     .result-actions {
@@ -1505,6 +1523,7 @@ function showResult() {
   // 마무리 메시지
   html += `<p class="closing-msg">💬 정답은 없어! 모든 학습자상이 소중해.<br>이건 참고용이야, 네 마음이 제일 중요해!</p>`;
   html += `<p class="credit">5학년 도덕 2단원 · 반성과 성찰</p>`;
+  html += `<div class="footer-maker">만든이: 룰루랄라 한기쌤 <a href="https://youtube.com/@coolhanman" target="_blank" rel="noopener">▶️ YouTube</a></div>`;
 
   container.innerHTML = html;
   showScreen('screenResult');
