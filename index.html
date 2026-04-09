@@ -561,6 +561,74 @@
       line-height: 1.6;
     }
 
+    /* ── 성장 영역 섹션 ── */
+    .growth-toggle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      margin: 16px 0 8px;
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+      border: 2px dashed #86efac;
+      border-radius: 14px;
+      font-family: var(--font-point);
+      font-size: 1rem;
+      color: #16a34a;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .growth-toggle-btn:hover { background: #dcfce7; }
+    .growth-toggle-btn .arrow {
+      transition: transform 0.3s;
+      font-size: 0.8rem;
+    }
+    .growth-toggle-btn.open .arrow { transform: rotate(180deg); }
+    .growth-area-wrap {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .growth-area-wrap.open { max-height: 2000px; }
+    .growth-note {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin: 8px 0 12px;
+      line-height: 1.5;
+    }
+    .growth-card {
+      padding: 16px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      border-left: 4px solid;
+    }
+    .growth-card h4 {
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+    .growth-card .growth-desc {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    .growth-card .growth-tip {
+      font-size: 0.85rem;
+      color: #374151;
+      background: rgba(255,255,255,0.6);
+      padding: 10px 12px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+    .growth-card .growth-reflect {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 8px;
+      font-style: italic;
+    }
+
     /* 메시지 */
     .closing-msg {
       font-family: var(--font-point);
@@ -1522,6 +1590,34 @@ function showResult() {
   });
   html += '</div>';
 
+  // 성장 영역 (접기/펼치기)
+  const top3Codes = finalTop3.map(t => t.code);
+  const sorted = Object.keys(PROFILES).map(code => ({ code, score: scores[code] || 0 }))
+    .sort((a, b) => a.score - b.score);
+  // TOP 3에 포함되지 않은 것 중 가장 낮은 2개
+  const growthItems = sorted.filter(s => !top3Codes.includes(s.code)).slice(0, 2);
+  const topVirtue = PROFILES[finalTop3[0].code].virtue;
+
+  html += `<button class="growth-toggle-btn" onclick="toggleGrowth(this)">
+    🌱 다음에 키워볼 학습자상 알아보기 <span class="arrow">▼</span>
+  </button>`;
+  html += '<div class="growth-area-wrap" id="growthArea">';
+  html += `<p class="growth-note">이번엔 덜 드러났지만, 너는 언제든 이 모습도 가질 수 있어!<br>이건 지금 모습일 뿐이야! 언제든 변할 수 있어 🌟</p>`;
+  growthItems.forEach(item => {
+    const p = PROFILES[item.code];
+    const topP = PROFILES[finalTop3[0].code];
+    html += `<div class="growth-card" style="background:${p.colorLight}; border-color:${p.color};">
+      <h4>${p.emoji} ${p.name}</h4>
+      <p class="growth-desc">${p.descLong}</p>
+      <div class="growth-tip">
+        💪 <strong>네 '${topP.emoji} ${topVirtue}' 힘으로 키워보자!</strong><br>
+        ${getGrowthTip(finalTop3[0].code, item.code)}
+      </div>
+      <p class="growth-reflect">🤔 생각해 보기: "${getReflectQuestion(item.code)}"</p>
+    </div>`;
+  });
+  html += '</div>';
+
   // 마무리 메시지
   html += `<p class="closing-msg">💬 정답은 없어! 모든 학습자상이 소중해.<br>이건 참고용이야, 네 마음이 제일 중요해!</p>`;
   html += `<p class="credit">5학년 도덕 2단원 · 반성과 성찰</p>`;
@@ -1672,6 +1768,63 @@ function saveImage() {
 // ═══════════════════════════════════════════════
 //  답변 수정하기 (마지막 문항으로 돌아감)
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+//  성장 영역 접기/펼치기
+// ═══════════════════════════════════════════════
+function toggleGrowth(btn) {
+  const wrap = document.getElementById('growthArea');
+  btn.classList.toggle('open');
+  wrap.classList.toggle('open');
+}
+
+// 강점 연결 성장 팁 생성
+function getGrowthTip(topCode, growthCode) {
+  const tips = {
+    INQ: { default: '궁금한 마음으로 이 영역을 탐구해 보자!' },
+    KNO: { default: '다양한 지식을 활용해서 이 영역을 넓혀 보자!' },
+    THI: { default: '깊이 생각하는 힘으로 이 영역도 발전시켜 보자!' },
+    COM: { default: '소통하는 능력으로 이 영역을 함께 키워 보자!' },
+    PRI: { default: '원칙을 지키는 힘으로 꾸준히 노력해 보자!' },
+    OPE: { default: '열린 마음으로 새로운 경험을 시도해 보자!' },
+    CAR: { default: '배려하는 마음으로 주변과 함께 성장해 보자!' },
+    RIS: { default: '도전하는 용기로 이 영역에 한 발짝 다가가 보자!' },
+    BAL: { default: '균형 잡힌 생활 속에서 자연스럽게 키워 보자!' },
+    REF: { default: '나를 돌아보는 힘으로 이 영역도 발견해 보자!' }
+  };
+  const growthTips = {
+    INQ: '새로운 것이 궁금할 때, 그 궁금증을 따라가 봐!',
+    KNO: '관심 있는 주제를 하나 골라서 깊이 알아보는 시간을 가져 봐!',
+    THI: '어떤 일이 생기면 "왜 그럴까?" 한 번 더 생각해 보는 연습을 해 봐!',
+    COM: '친구에게 오늘 있었던 일을 이야기하거나, 친구 말에 끝까지 귀 기울여 봐!',
+    PRI: '약속을 정하고 꼭 지키는 작은 실천부터 시작해 봐!',
+    OPE: '나와 다른 생각을 가진 친구의 이야기를 "왜 그렇게 생각할까?" 하고 들어 봐!',
+    CAR: '주변에서 도움이 필요한 친구를 먼저 찾아 봐!',
+    RIS: '실패해도 괜찮아! 해 본 적 없는 것에 한 번 도전해 봐!',
+    BAL: '공부, 놀이, 쉬는 시간을 골고루 계획해 봐!',
+    REF: '하루 끝에 "오늘 나는 어땠을까?" 잠깐 생각해 보는 시간을 가져 봐!'
+  };
+  const topTip = tips[topCode] ? tips[topCode].default : '';
+  const growthAction = growthTips[growthCode] || '';
+  return topTip + '<br>' + growthAction;
+}
+
+// 성찰 질문 생성
+function getReflectQuestion(code) {
+  const questions = {
+    INQ: '최근에 정말 궁금했던 것은 무엇이었나요?',
+    KNO: '새로 알게 된 것 중에서 누군가에게 알려주고 싶은 것이 있나요?',
+    THI: '어떤 문제를 만났을 때, 나는 보통 어떻게 해결하나요?',
+    COM: '내 생각을 친구에게 잘 전달했던 순간은 언제였나요?',
+    PRI: '최근에 옳다고 생각하는 일을 했던 경험이 있나요?',
+    OPE: '나와 다른 의견을 들었을 때, 나는 어떻게 반응했나요?',
+    CAR: '주변 친구가 힘들어할 때, 나는 어떻게 했나요?',
+    RIS: '해 보고 싶지만 아직 용기가 나지 않는 것이 있나요?',
+    BAL: '요즘 나의 하루는 얼마나 균형 잡혀 있나요?',
+    REF: '최근에 나 자신에 대해 새롭게 알게 된 것이 있나요?'
+  };
+  return questions[code] || '이 학습자상이 필요한 순간은 언제였을까?';
+}
+
 function goBackToEdit() {
   const lastIdx = shuffledQuestions.length - 1; // 마지막 문항으로 이동
   renderQuestion(lastIdx);
