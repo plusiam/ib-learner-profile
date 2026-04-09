@@ -671,6 +671,91 @@
     }
     .result-actions .btn { min-width: 140px; }
 
+    /* ── 컴팩트 프로필 카드 ── */
+    .compact-card {
+      display: none;
+      width: 400px;
+      padding: 28px 24px;
+      background: #fff;
+      border-radius: 20px;
+      text-align: center;
+      font-family: var(--font-body);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .compact-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #FF6B6B, #FFE66D, #4ECDC4, #A29BFE, #FF6B8A);
+    }
+    .compact-card .cc-title {
+      font-family: var(--font-point);
+      font-size: 1.1rem;
+      color: var(--text-main);
+      margin: 8px 0 16px;
+    }
+    .compact-card .cc-top1 {
+      padding: 20px 16px;
+      border-radius: 16px;
+      margin-bottom: 14px;
+    }
+    .compact-card .cc-top1-emoji {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .compact-card .cc-top1-name {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .compact-card .cc-top1-desc {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 8px;
+    }
+    .compact-card .cc-top1-virtue {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .compact-card .cc-sub-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .compact-card .cc-sub-item {
+      flex: 1;
+      padding: 12px 8px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .compact-card .cc-sub-emoji {
+      font-size: 1.6rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .compact-card .cc-sub-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .compact-card .cc-growth {
+      background: #f0fdf4;
+      border: 1px dashed #86efac;
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 0.8rem;
+      color: #16a34a;
+    }
+    .compact-card .cc-msg {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      line-height: 1.4;
+    }
+
     /* ── 반응형 ── */
     @media (max-width: 400px) {
       .likert-options { flex-direction: column; }
@@ -736,10 +821,13 @@
       <!-- 동적 생성 -->
     </div>
     <div class="result-actions" id="resultActions">
-      <button class="btn btn-primary" onclick="saveImage()">📷 이미지 저장</button>
+      <button class="btn btn-primary" onclick="saveImage()">📷 전체 결과 저장</button>
+      <button class="btn btn-primary" onclick="saveCompactCard()" style="background:#16a34a;">🃏 카드 저장</button>
       <button class="btn btn-secondary" onclick="goBackToEdit()">⬅️ 답변 수정하기</button>
       <button class="btn btn-secondary" onclick="location.reload()">🔄 처음부터 다시 하기</button>
     </div>
+    <!-- 숨겨진 컴팩트 카드 (캡처용) -->
+    <div id="compactCard" class="compact-card"></div>
   </div>
 
 </div>
@@ -1579,22 +1667,10 @@ function showResult() {
     </div>`;
   });
 
-  // 그림책 캐릭터 힌트
-  const virtues = finalTop3.map(t => PROFILES[t.code].virtue);
-  html += '<div class="result-section-title">── 📖 그림책 캐릭터 힌트 ──</div>';
-  html += '<div class="character-hint-box">';
-  html += `<p class="hint-q">"${virtues.join(' + ')}의 미덕을 가진 주인공이라면 어떤 이야기를 만들 수 있을까?"</p>`;
-  finalTop3.forEach(item => {
-    const p = PROFILES[item.code];
-    html += `<p class="hint-item">${p.emoji} ${p.characterHint}</p>`;
-  });
-  html += '</div>';
-
   // 성장 영역 (접기/펼치기)
   const top3Codes = finalTop3.map(t => t.code);
   const sorted = Object.keys(PROFILES).map(code => ({ code, score: scores[code] || 0 }))
     .sort((a, b) => a.score - b.score);
-  // TOP 3에 포함되지 않은 것 중 가장 낮은 2개
   const growthItems = sorted.filter(s => !top3Codes.includes(s.code)).slice(0, 2);
   const topVirtue = PROFILES[finalTop3[0].code].virtue;
 
@@ -1761,6 +1837,71 @@ function saveImage() {
     link.click();
   }).catch(err => {
     alert('이미지 저장에 실패했어요. 스크린샷으로 저장해 주세요!');
+    console.error(err);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  컴팩트 카드 저장
+// ═══════════════════════════════════════════════
+function saveCompactCard() {
+  const card = document.getElementById('compactCard');
+  const t1 = PROFILES[finalTop3[0].code];
+  const t2 = PROFILES[finalTop3[1].code];
+  const t3 = PROFILES[finalTop3[2].code];
+
+  // 성장 영역 1개 (가장 낮은 것)
+  const top3Codes = finalTop3.map(t => t.code);
+  const growthCode = Object.keys(PROFILES)
+    .map(code => ({ code, score: scores[code] || 0 }))
+    .sort((a, b) => a.score - b.score)
+    .filter(s => !top3Codes.includes(s.code))[0];
+  const gp = PROFILES[growthCode.code];
+
+  card.innerHTML = `
+    <div class="cc-title">✨ ${studentName}의 학습자상 카드 ✨</div>
+    <div class="cc-top1" style="background:${t1.colorLight};">
+      <span class="cc-top1-emoji">${t1.emoji}</span>
+      <div class="cc-top1-name" style="color:${t1.color};">🥇 ${t1.name}</div>
+      <div class="cc-top1-desc">${t1.desc}</div>
+      <div class="cc-top1-virtue" style="color:${t1.color};">✨ 핵심 미덕: ${t1.virtue}</div>
+    </div>
+    <div class="cc-sub-row">
+      <div class="cc-sub-item" style="background:${t2.colorLight};">
+        <span class="cc-sub-emoji">${t2.emoji}</span>
+        <div class="cc-sub-name">🥈 ${t2.name}</div>
+      </div>
+      <div class="cc-sub-item" style="background:${t3.colorLight};">
+        <span class="cc-sub-emoji">${t3.emoji}</span>
+        <div class="cc-sub-name">🥉 ${t3.name}</div>
+      </div>
+    </div>
+    <div class="cc-growth">🌱 다음에 키워볼 학습자상: ${gp.emoji} ${gp.name}</div>
+    <div class="cc-msg">정답은 없어! 모든 학습자상이 소중해.<br>이건 참고용이야, 네 마음이 제일 중요해!</div>
+  `;
+
+  // 잠깐 보이게 한 뒤 캡처
+  card.style.display = 'block';
+  card.style.position = 'fixed';
+  card.style.left = '-9999px';
+  card.style.top = '0';
+
+  html2canvas(card, {
+    backgroundColor: '#ffffff',
+    scale: 2,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    card.style.display = 'none';
+    card.style.position = '';
+    card.style.left = '';
+    const link = document.createElement('a');
+    link.download = `${studentName}_학습자상카드.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }).catch(err => {
+    card.style.display = 'none';
+    alert('카드 저장에 실패했어요. 스크린샷으로 저장해 주세요!');
     console.error(err);
   });
 }
