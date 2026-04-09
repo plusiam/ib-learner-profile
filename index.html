@@ -626,6 +626,7 @@
       <input type="text" id="nameInput" placeholder="이름을 적어 줘!" maxlength="10" autocomplete="off">
       <p class="info-text">30개 질문에 답하면 나의 학습자상 TOP 3를 알 수 있어!<br>약 12~15분 정도 걸려요.</p>
       <button class="btn btn-primary" onclick="handleStart()">시작하기 ✨</button>
+      <button class="btn btn-secondary" onclick="location.reload()" style="margin-top:8px;">🔄 새로고침</button>
     </div>
   </div>
 
@@ -668,7 +669,9 @@
     </div>
     <div class="result-actions" id="resultActions">
       <button class="btn btn-primary" onclick="saveImage()">📷 이미지 저장</button>
+      <button class="btn btn-secondary" onclick="goBackToEdit()">⬅️ 답변 수정하기</button>
       <button class="btn btn-secondary" onclick="resetSurvey()">🔄 다시 하기</button>
+      <button class="btn btn-secondary" onclick="location.reload()">🏠 처음으로</button>
     </div>
   </div>
 
@@ -1665,6 +1668,15 @@ function saveImage() {
     alert('이미지 저장에 실패했어요. 스크린샷으로 저장해 주세요!');
     console.error(err);
   });
+}
+
+// ═══════════════════════════════════════════════
+//  답변 수정하기 (마지막 문항으로 돌아감)
+// ═══════════════════════════════════════════════
+function goBackToEdit() {
+  currentQ = shuffledOrder.length - 1; // 마지막 문항으로 이동
+  renderQuestion();
+  showScreen('screenSurvey');
 }
 
 // ═══════════════════════════════════════════════
